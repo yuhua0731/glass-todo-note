@@ -1,0 +1,8 @@
+[environment]
+name = "glass-todo-note"
+description = "macOS SwiftUI utility app workspace"
+
+[commands]
+build = "swift build"
+test = "swift test"
+run = "script/build_and_run.sh"
