@@ -35,4 +35,27 @@ struct WindowBehaviorTests {
         #expect(WindowZoom.size(for: 1.5).width == 540)
         #expect(WindowZoom.size(for: 1.5).height == 630)
     }
+
+    @Test func resizedFrameKeepsTopLeftPinned() {
+        let frame = WindowZoom.frame(
+            for: 1.5,
+            currentFrame: WindowFrame(x: 100, y: 200, width: 360, height: 420)
+        )
+
+        #expect(frame.x == 100)
+        #expect(frame.y == -10)
+        #expect(frame.width == 540)
+        #expect(frame.height == 630)
+    }
+
+    @Test func initialZoomAppliesOnlyOncePerWindow() {
+        var state = WindowZoomApplicationState()
+        let firstMain = state.shouldApplyInitialZoom(to: "main")
+        let secondMain = state.shouldApplyInitialZoom(to: "main")
+        let replacement = state.shouldApplyInitialZoom(to: "replacement")
+
+        #expect(firstMain)
+        #expect(!secondMain)
+        #expect(replacement)
+    }
 }

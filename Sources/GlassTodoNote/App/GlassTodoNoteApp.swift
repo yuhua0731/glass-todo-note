@@ -9,6 +9,7 @@ struct GlassTodoNoteApp: App {
     @State private var todoStore = TodoStore()
     @State private var windowController = StickyWindowController()
     @State private var stickyWindow: NSWindow?
+    @State private var zoomApplicationState = WindowZoomApplicationState()
     @State private var lastReminderFiredAt: Date?
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
@@ -23,7 +24,9 @@ struct GlassTodoNoteApp: App {
                     WindowAccessor { window in
                         stickyWindow = window
                         configureStickyWindow(window)
-                        windowController.resize(window, zoom: windowZoom)
+                        if zoomApplicationState.shouldApplyInitialZoom(to: "\(ObjectIdentifier(window))") {
+                            windowController.resize(window, zoom: windowZoom, animate: false)
+                        }
                     }
                 }
                 .task {
