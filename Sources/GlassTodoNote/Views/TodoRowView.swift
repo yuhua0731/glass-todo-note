@@ -4,6 +4,7 @@ import SwiftUI
 struct TodoRowView: View {
     let todo: TodoItem
     let isCompleting: Bool
+    let isShattering: Bool
     var onTitleChange: (String) -> Void
     var onProgressChange: (Double) -> Void
     var onDelete: () -> Void
@@ -11,12 +12,14 @@ struct TodoRowView: View {
     init(
         todo: TodoItem,
         isCompleting: Bool,
+        isShattering: Bool,
         onTitleChange: @escaping (String) -> Void,
         onProgressChange: @escaping (Double) -> Void,
         onDelete: @escaping () -> Void
     ) {
         self.todo = todo
         self.isCompleting = isCompleting
+        self.isShattering = isShattering
         self.onTitleChange = onTitleChange
         self.onProgressChange = onProgressChange
         self.onDelete = onDelete
@@ -57,6 +60,8 @@ struct TodoRowView: View {
         }
         .padding(12)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .opacity(isCompleting ? 0.55 : 1)
+        .opacity(isShattering ? 0 : (isCompleting ? 0.55 : 1))
+        .scaleEffect(y: isShattering ? 0.7 : 1, anchor: .top)
+        .animation(.easeInOut(duration: 0.45), value: isShattering)
     }
 }

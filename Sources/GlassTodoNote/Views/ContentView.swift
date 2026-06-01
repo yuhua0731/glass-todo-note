@@ -30,6 +30,12 @@ struct ContentView: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(.quaternary, lineWidth: 1)
         }
+        .overlay(alignment: .top) {
+            ForEach(bubbleBursts) { burst in
+                BubbleCelebrationView(seed: burst.seed)
+                    .allowsHitTesting(false)
+            }
+        }
     }
 
     private var header: some View {
@@ -66,6 +72,7 @@ struct ContentView: View {
                     TodoRowView(
                         todo: todo,
                         isCompleting: store.completingIDs.contains(todo.id),
+                        isShattering: shatteringIDs.contains(todo.id),
                         onTitleChange: { title in
                             store.updateTitle(id: todo.id, title: title)
                         },
@@ -90,12 +97,6 @@ struct ContentView: View {
             }
         }
         .scrollIndicators(.hidden)
-        .overlay(alignment: .top) {
-            ForEach(bubbleBursts) { burst in
-                BubbleCelebrationView(seed: burst.seed)
-                    .allowsHitTesting(false)
-            }
-        }
         .onChange(of: store.pendingCompletionIDs) { _, _ in
             consumeCompletions()
         }
