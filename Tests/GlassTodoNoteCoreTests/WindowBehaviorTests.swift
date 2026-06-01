@@ -25,4 +25,14 @@ struct WindowBehaviorTests {
         #expect(first.offsets.contains(8))
         #expect(first.offsets.contains(-8))
     }
+
+    @Test func windowZoomClampsAndStepsPredictably() {
+        #expect(WindowZoom.clamp(0.3) == 0.6)
+        #expect(WindowZoom.clamp(2.5) == 1.8)
+        #expect(WindowZoom.zoomIn(from: 1.0) == 1.1)
+        #expect(WindowZoom.zoomOut(from: 1.0) == 0.9)
+        #expect(WindowZoom.reset == 1.0)
+        #expect(WindowZoom.size(for: 1.5).width == 540)
+        #expect(WindowZoom.size(for: 1.5).height == 630)
+    }
 }

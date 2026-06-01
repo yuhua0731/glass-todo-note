@@ -13,22 +13,17 @@ struct GlassTodoNoteApp: App {
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
     @AppStorage("window.reminderShakeEnabled") private var reminderShakeEnabled = true
+    @AppStorage("window.zoom") private var windowZoom = WindowZoom.reset
 
     var body: some Scene {
         WindowGroup("Glass Todo Note") {
             ContentView(store: todoStore)
-                .frame(minWidth: 360, minHeight: 420)
+                .frame(minWidth: WindowZoom.baseWidth, minHeight: WindowZoom.baseHeight)
                 .background {
                     WindowAccessor { window in
                         stickyWindow = window
-                        windowController.configure(
-                            window,
-                            preferences: WindowPreferences(
-                                opacity: windowOpacity,
-                                floatsAboveWindows: floatsAboveWindows,
-                                reminderShakeEnabled: reminderShakeEnabled
-                            )
-                        )
+                        configureStickyWindow(window)
+                        windowController.resize(window, zoom: windowZoom)
                     }
                 }
                 .task {
@@ -48,12 +43,53 @@ struct GlassTodoNoteApp: App {
                         await todoStore.flushPendingSaves()
                     }
                 }
+                .onChange(of: windowOpacity) { _, _ in
+                    configureStickyWindow(stickyWindow)
+                }
+                .onChange(of: floatsAboveWindows) { _, _ in
+                    configureStickyWindow(stickyWindow)
+                }
+                .onChange(of: windowZoom) { _, zoom in
+                    guard let stickyWindow else { return }
+                    windowController.resize(stickyWindow, zoom: zoom)
+                }
         }
         .windowStyle(.hiddenTitleBar)
+        .commands {
+            CommandMenu("View") {
+                Button("Zoom In") {
+                    windowZoom = WindowZoom.zoomIn(from: windowZoom)
+                }
+                .keyboardShortcut("+", modifiers: .command)
+
+                Button("Zoom Out") {
+                    windowZoom = WindowZoom.zoomOut(from: windowZoom)
+                }
+                .keyboardShortcut("-", modifiers: .command)
+
+                Button("Actual Size") {
+                    windowZoom = WindowZoom.reset
+                }
+                .keyboardShortcut("0", modifiers: .command)
+            }
+        }
 
         Settings {
             SettingsView()
         }
+    }
+
+    @MainActor
+    private func configureStickyWindow(_ window: NSWindow?) {
+        guard let window else { return }
+        windowController.configure(
+            window,
+            preferences: WindowPreferences(
+                opacity: windowOpacity,
+                floatsAboveWindows: floatsAboveWindows,
+                reminderShakeEnabled: reminderShakeEnabled
+            )
+        )
     }
 
     @MainActor

@@ -49,5 +49,16 @@ final class StickyWindowController {
         }
     }
 
+    func resize(_ window: NSWindow, zoom: Double) {
+        let size = WindowZoom.size(for: zoom)
+        let currentFrame = window.frame
+        let newSize = NSSize(width: size.width, height: size.height)
+        let newOrigin = NSPoint(
+            x: currentFrame.midX - newSize.width / 2,
+            y: currentFrame.midY - newSize.height / 2
+        )
+        window.setFrame(NSRect(origin: newOrigin, size: newSize), display: true, animate: true)
+    }
+
     @MainActor private static var shakeOriginKey: UInt8 = 0
 }
