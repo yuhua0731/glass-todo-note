@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "App scaffold is not implemented yet. Confirm the plan before building."
+cd "$(dirname "$0")/.."
+
+exec swift run GlassTodoNote
