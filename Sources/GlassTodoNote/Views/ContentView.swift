@@ -1,3 +1,4 @@
+import AppKit
 import GlassTodoNoteCore
 import SwiftUI
 
@@ -6,7 +7,11 @@ struct ContentView: View {
     @State private var newTitle = ""
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
+    @AppStorage("window.backgroundMode") private var backgroundMode = BackgroundMode.preset.rawValue
     @AppStorage("window.backgroundAppearance") private var backgroundAppearance = BackgroundAppearance.glass.rawValue
+    @AppStorage("window.backgroundColorHex") private var backgroundColorHex = StoredBackgroundColor.defaultHex
+    @AppStorage("window.backgroundImagePath") private var backgroundImagePath = ""
+    @AppStorage("window.backgroundImageRevision") private var backgroundImageRevision = ""
     @AppStorage("window.zoom") private var windowZoom = WindowZoom.reset
     @State private var shatteringIDs: Set<TodoItem.ID> = []
     @State private var bubbleBursts: [BubbleBurst] = []
@@ -45,15 +50,17 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    @ViewBuilder
     private var noteBackground: some View {
-        RoundedRectangle(cornerRadius: 24, style: .continuous)
-            .fill(backgroundStyle.material)
-            .opacity(backgroundOpacity)
-            .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(backgroundStyle.tint)
-                    .opacity(backgroundOpacity)
-            }
+        switch currentBackgroundMode {
+        case .preset:
+            presetBackground
+        case .solidColor:
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(Color(storedHex: backgroundColorHex).opacity(backgroundOpacity))
+        case .image:
+            imageBackground
+        }
     }
 
     private var header: some View {
@@ -180,6 +187,43 @@ struct ContentView: View {
         case .blush:
             (.regularMaterial, .pink.opacity(0.13))
         }
+    }
+
+    private var presetBackground: some View {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .fill(backgroundStyle.material)
+            .opacity(backgroundOpacity)
+            .overlay {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(backgroundStyle.tint)
+                    .opacity(backgroundOpacity)
+            }
+    }
+
+    @ViewBuilder
+    private var imageBackground: some View {
+        if let backgroundImage {
+            Image(nsImage: backgroundImage)
+                .resizable()
+                .scaledToFill()
+                .opacity(backgroundOpacity)
+                .id(backgroundImageRevision)
+        } else {
+            presetBackground
+        }
+    }
+
+    private var backgroundImage: NSImage? {
+        guard currentBackgroundMode == .image,
+              !backgroundImagePath.isEmpty else {
+            return nil
+        }
+        _ = backgroundImageRevision
+        return NSImage(contentsOf: URL(fileURLWithPath: backgroundImagePath))
+    }
+
+    private var currentBackgroundMode: BackgroundMode {
+        BackgroundMode(rawValue: backgroundMode) ?? .preset
     }
 
     private var backgroundOpacity: Double {
