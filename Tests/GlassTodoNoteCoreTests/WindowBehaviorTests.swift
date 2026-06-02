@@ -27,12 +27,15 @@ struct WindowBehaviorTests {
     }
 
     @Test func windowZoomClampsAndStepsPredictably() {
-        #expect(WindowZoom.clamp(0.3) == 0.6)
-        #expect(WindowZoom.clamp(2.5) == 1.8)
         #expect(WindowZoom.zoomIn(from: 1.0) == 1.1)
-        #expect(WindowZoom.zoomOut(from: 1.0) == 0.9)
+        #expect(WindowZoom.zoomIn(from: -2.0) == 1.1)
+        #expect(abs(WindowZoom.zoomOut(from: 1.0) - 0.909) < 0.001)
+        #expect(WindowZoom.zoomOut(from: 0.5) < 0.5)
+        #expect(WindowZoom.contentScale(for: -2.0) == 1.0)
+        #expect(WindowZoom.sanitizedStoredValue(-2.0) == 1.0)
         #expect(WindowZoom.reset == 1.0)
         #expect(WindowZoom.contentScale(for: 1.5) == 1.5)
+        #expect(WindowZoom.metric(20, for: 1.5) == 30)
     }
 
     @Test func contentZoomDoesNotChangeWindowBaseSize() {

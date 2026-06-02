@@ -1,7 +1,9 @@
+import GlassTodoNoteCore
 import SwiftUI
 
 struct ProgressDragView: View {
     let progress: Double
+    let zoom: Double
     var onChange: (Double) -> Void
 
     var body: some View {
@@ -15,8 +17,8 @@ struct ProgressDragView: View {
                 Circle()
                     .fill(.white)
                     .shadow(radius: 2)
-                    .frame(width: 18, height: 18)
-                    .offset(x: max(0, proxy.size.width * progress / 100 - 9))
+                    .frame(width: metric(18), height: metric(18))
+                    .offset(x: max(0, proxy.size.width * progress / 100 - metric(9)))
             }
             .contentShape(Rectangle())
             .gesture(
@@ -29,5 +31,9 @@ struct ProgressDragView: View {
         }
         .accessibilityLabel("Progress")
         .accessibilityValue("\(Int(progress.rounded())) percent")
+    }
+
+    private func metric(_ baseValue: Double) -> CGFloat {
+        CGFloat(WindowZoom.metric(baseValue, for: zoom))
     }
 }

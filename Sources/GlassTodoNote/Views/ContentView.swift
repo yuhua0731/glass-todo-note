@@ -31,19 +31,13 @@ struct ContentView: View {
     }
 
     private var zoomedContent: some View {
-        let scale = WindowZoom.contentScale(for: windowZoom)
-        return VStack(alignment: .leading, spacing: 14) {
+        return VStack(alignment: .leading, spacing: metric(14)) {
             header
             addRow
             todoList
         }
-        .padding(20)
-        .frame(
-            width: WindowZoom.contentLayoutSize(for: windowZoom).width,
-            height: WindowZoom.contentLayoutSize(for: windowZoom).height,
-            alignment: .topLeading
-        )
-        .scaleEffect(scale, anchor: .topLeading)
+        .padding(metric(20))
+        .frame(width: WindowZoom.windowSize.width, height: WindowZoom.windowSize.height, alignment: .topLeading)
     }
 
     private var noteBackground: some View {
@@ -56,12 +50,13 @@ struct ContentView: View {
     }
 
     private var header: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: metric(10)) {
             Text("Glass Todo")
-                .font(.headline)
+                .font(.system(size: metric(16), weight: .semibold))
             Spacer()
             SettingsLink {
                 Image(systemName: "gearshape")
+                    .font(.system(size: metric(16), weight: .medium))
             }
             .buttonStyle(.borderless)
             .help("Settings")
@@ -69,12 +64,14 @@ struct ContentView: View {
     }
 
     private var addRow: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: metric(8)) {
             TextField("New task", text: $newTitle)
                 .textFieldStyle(.roundedBorder)
+                .font(.system(size: metric(14)))
                 .onSubmit(addTodo)
             Button(action: addTodo) {
                 Image(systemName: "plus")
+                    .font(.system(size: metric(14), weight: .medium))
             }
             .buttonStyle(.borderedProminent)
             .disabled(newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -84,12 +81,13 @@ struct ContentView: View {
 
     private var todoList: some View {
         ScrollView {
-            LazyVStack(spacing: 10) {
+            LazyVStack(spacing: metric(10)) {
                 ForEach(store.todos) { todo in
                     TodoRowView(
                         todo: todo,
                         isCompleting: store.completingIDs.contains(todo.id),
                         isShattering: shatteringIDs.contains(todo.id),
+                        zoom: WindowZoom.contentScale(for: windowZoom),
                         onTitleChange: { title in
                             store.updateTitle(id: todo.id, title: title)
                         },
@@ -109,7 +107,8 @@ struct ContentView: View {
                 }
                 if store.todos.isEmpty {
                     ContentUnavailableView("No Tasks", systemImage: "checkmark.circle")
-                        .frame(maxWidth: .infinity, minHeight: 180)
+                        .font(.system(size: metric(13)))
+                        .frame(maxWidth: .infinity, minHeight: metric(180))
                 }
             }
         }
@@ -162,6 +161,10 @@ struct ContentView: View {
         case .blush:
             (.regularMaterial, .pink.opacity(0.13))
         }
+    }
+
+    private func metric(_ baseValue: Double) -> CGFloat {
+        CGFloat(WindowZoom.metric(baseValue, for: windowZoom))
     }
 }
 

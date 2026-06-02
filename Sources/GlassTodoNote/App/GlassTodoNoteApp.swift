@@ -32,6 +32,7 @@ struct GlassTodoNoteApp: App {
                     await runReminderLoop()
                 }
                 .onAppear {
+                    windowZoom = WindowZoom.sanitizedStoredValue(windowZoom)
                     appDelegate.flushPendingSaves = {
                         await todoStore.flushPendingSaves()
                     }

@@ -6,7 +6,6 @@ struct SettingsView: View {
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
     @AppStorage("window.reminderShakeEnabled") private var reminderShakeEnabled = true
     @AppStorage("window.backgroundAppearance") private var backgroundAppearance = BackgroundAppearance.glass.rawValue
-    @AppStorage("window.zoom") private var windowZoom = WindowZoom.reset
 
     var body: some View {
         Form {
@@ -21,15 +20,6 @@ struct SettingsView: View {
                     Text("Opacity")
                 }
                 Toggle("Float above other windows", isOn: $floatsAboveWindows)
-                Slider(
-                    value: Binding(
-                        get: { WindowZoom.clamp(windowZoom) },
-                        set: { windowZoom = WindowZoom.clamp($0) }
-                    ),
-                    in: WindowZoom.minimum...WindowZoom.maximum
-                ) {
-                    Text("Zoom")
-                }
             }
 
             Section("Reminders") {
