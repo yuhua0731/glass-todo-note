@@ -14,10 +14,29 @@ final class StickyWindowController {
         window.titlebarAppearsTransparent = true
         window.styleMask.insert(.fullSizeContentView)
         window.level = preferences.floatsAboveWindows ? .floating : .normal
-        window.alphaValue = preferences.opacity
+        window.alphaValue = 1
         window.contentView?.wantsLayer = true
         window.contentView?.layer?.cornerRadius = preferences.cornerRadius
         window.contentView?.layer?.masksToBounds = true
+    }
+
+    func fitToContent(_ window: NSWindow, width: Double, height: Double) {
+        let contentSize = NSSize(width: width, height: height)
+        let frameSize = window.frameRect(forContentRect: NSRect(origin: .zero, size: contentSize)).size
+        let currentFrame = window.frame
+
+        guard abs(currentFrame.width - frameSize.width) > 0.5
+            || abs(currentFrame.height - frameSize.height) > 0.5 else {
+            return
+        }
+
+        let newFrame = NSRect(
+            x: currentFrame.minX,
+            y: currentFrame.maxY - frameSize.height,
+            width: frameSize.width,
+            height: frameSize.height
+        )
+        window.setFrame(newFrame, display: true, animate: false)
     }
 
     func shake(_ window: NSWindow, plan: WindowShakePlan = WindowShakePlan()) {

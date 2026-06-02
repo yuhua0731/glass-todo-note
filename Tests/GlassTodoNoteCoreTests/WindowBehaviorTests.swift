@@ -38,13 +38,17 @@ struct WindowBehaviorTests {
         #expect(WindowZoom.metric(20, for: 1.5) == 30)
     }
 
-    @Test func contentZoomDoesNotChangeWindowBaseSize() {
-        #expect(WindowZoom.windowSize.width == 360)
-        #expect(WindowZoom.windowSize.height == 420)
+    @Test func contentWidthScalesWithZoom() {
+        #expect(WindowZoom.contentWidth(for: 0.6) == 216)
+        #expect(WindowZoom.contentWidth(for: 1.0) == 360)
+        #expect(WindowZoom.contentWidth(for: 1.8) == 648)
     }
 
-    @Test func zoomedContentLayoutSizeStaysAtWindowSize() {
-        #expect(WindowZoom.contentLayoutSize(for: 0.6).width == 360)
-        #expect(WindowZoom.contentLayoutSize(for: 1.8).height == 420)
+    @Test func windowContentHeightAdaptsToTaskCount() {
+        #expect(WindowZoom.contentHeight(todoCount: 0, for: 1.0) == 304)
+        #expect(WindowZoom.contentHeight(todoCount: 2, for: 1.0) == 278)
+        #expect(WindowZoom.contentHeight(todoCount: 10, for: 1.0) == 544)
+        #expect(WindowZoom.contentHeight(todoCount: 2, for: 1.5) == 417)
+        #expect(WindowZoom.listHeight(todoCount: 10, for: 10) == 420)
     }
 }

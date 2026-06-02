@@ -9,6 +9,7 @@ struct GlassTodoNoteApp: App {
     @State private var todoStore = TodoStore()
     @State private var windowController = StickyWindowController()
     @State private var stickyWindow: NSWindow?
+    @State private var pendingWindowFitTask: Task<Void, Never>?
     @State private var lastReminderFiredAt: Date?
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
@@ -18,15 +19,16 @@ struct GlassTodoNoteApp: App {
     var body: some Scene {
         WindowGroup("Glass Todo Note") {
             ContentView(store: todoStore)
-                .frame(minWidth: WindowZoom.windowSize.width, minHeight: WindowZoom.windowSize.height)
                 .background {
                     WindowAccessor { window in
                         stickyWindow = window
                         configureStickyWindow(window)
+                        scheduleStickyWindowFit()
                     }
                 }
                 .task {
                     await todoStore.loadFromPersistence()
+                    scheduleStickyWindowFit()
                 }
                 .task {
                     await runReminderLoop()
@@ -48,6 +50,12 @@ struct GlassTodoNoteApp: App {
                 }
                 .onChange(of: floatsAboveWindows) { _, _ in
                     configureStickyWindow(stickyWindow)
+                }
+                .onChange(of: windowZoom) { _, _ in
+                    scheduleStickyWindowFit()
+                }
+                .onChange(of: todoStore.todos.count) { _, _ in
+                    scheduleStickyWindowFit()
                 }
         }
         .windowStyle(.hiddenTitleBar)
@@ -85,6 +93,26 @@ struct GlassTodoNoteApp: App {
                 floatsAboveWindows: floatsAboveWindows,
                 reminderShakeEnabled: reminderShakeEnabled
             )
+        )
+    }
+
+    @MainActor
+    private func scheduleStickyWindowFit() {
+        pendingWindowFitTask?.cancel()
+        pendingWindowFitTask = Task { @MainActor in
+            await Task.yield()
+            guard !Task.isCancelled else { return }
+            fitStickyWindowToContent(stickyWindow)
+        }
+    }
+
+    @MainActor
+    private func fitStickyWindowToContent(_ window: NSWindow?) {
+        guard let window else { return }
+        windowController.fitToContent(
+            window,
+            width: WindowZoom.contentWidth(for: windowZoom),
+            height: WindowZoom.contentHeight(todoCount: todoStore.todos.count, for: windowZoom)
         )
     }
 

@@ -4,6 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @Bindable var store: TodoStore
     @State private var newTitle = ""
+    @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
     @AppStorage("window.backgroundAppearance") private var backgroundAppearance = BackgroundAppearance.glass.rawValue
     @AppStorage("window.zoom") private var windowZoom = WindowZoom.reset
@@ -16,7 +17,11 @@ struct ContentView: View {
             noteBackground
             zoomedContent
         }
-        .frame(minWidth: WindowZoom.windowSize.width, minHeight: WindowZoom.windowSize.height)
+        .frame(
+            width: WindowZoom.contentWidth(for: windowZoom),
+            height: WindowZoom.contentHeight(todoCount: store.todos.count, for: windowZoom),
+            alignment: .topLeading
+        )
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -37,15 +42,17 @@ struct ContentView: View {
             todoList
         }
         .padding(metric(20))
-        .frame(width: WindowZoom.windowSize.width, height: WindowZoom.windowSize.height, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private var noteBackground: some View {
         RoundedRectangle(cornerRadius: 24, style: .continuous)
             .fill(backgroundStyle.material)
+            .opacity(backgroundOpacity)
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(backgroundStyle.tint)
+                    .opacity(backgroundOpacity)
             }
     }
 
@@ -66,15 +73,26 @@ struct ContentView: View {
     private var addRow: some View {
         HStack(spacing: metric(8)) {
             TextField("New task", text: $newTitle)
-                .textFieldStyle(.roundedBorder)
+                .textFieldStyle(.plain)
                 .font(.system(size: metric(14)))
+                .padding(.horizontal, metric(8))
+                .frame(height: metric(28))
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 5, style: .continuous)
+                        .stroke(.quaternary, lineWidth: 1)
+                }
                 .onSubmit(addTodo)
             Button(action: addTodo) {
                 Image(systemName: "plus")
                     .font(.system(size: metric(14), weight: .medium))
+                    .frame(width: metric(28), height: metric(28))
+                    .background(.tint.opacity(0.72), in: RoundedRectangle(cornerRadius: 5, style: .continuous))
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.plain)
+            .foregroundStyle(.white)
             .disabled(newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .opacity(newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.45 : 1)
             .help("Add task")
         }
     }
@@ -112,6 +130,7 @@ struct ContentView: View {
                 }
             }
         }
+        .frame(height: CGFloat(WindowZoom.listHeight(todoCount: store.todos.count, for: windowZoom)))
         .scrollIndicators(.hidden)
         .onChange(of: store.pendingCompletionIDs) { _, _ in
             consumeCompletions()
@@ -161,6 +180,10 @@ struct ContentView: View {
         case .blush:
             (.regularMaterial, .pink.opacity(0.13))
         }
+    }
+
+    private var backgroundOpacity: Double {
+        WindowPreferences(opacity: windowOpacity).opacity
     }
 
     private func metric(_ baseValue: Double) -> CGFloat {
