@@ -6,25 +6,17 @@ struct ContentView: View {
     @State private var newTitle = ""
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
     @AppStorage("window.backgroundAppearance") private var backgroundAppearance = BackgroundAppearance.glass.rawValue
+    @AppStorage("window.zoom") private var windowZoom = WindowZoom.reset
     @State private var shatteringIDs: Set<TodoItem.ID> = []
     @State private var bubbleBursts: [BubbleBurst] = []
     private let completionTiming = CompletionAnimationTiming()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            header
-            addRow
-            todoList
+        ZStack(alignment: .topLeading) {
+            noteBackground
+            zoomedContent
         }
-        .padding(20)
-        .background {
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(backgroundStyle.material)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 24, style: .continuous)
-                        .fill(backgroundStyle.tint)
-                }
-        }
+        .frame(minWidth: WindowZoom.windowSize.width, minHeight: WindowZoom.windowSize.height)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
@@ -36,6 +28,31 @@ struct ContentView: View {
                     .allowsHitTesting(false)
             }
         }
+    }
+
+    private var zoomedContent: some View {
+        let scale = WindowZoom.contentScale(for: windowZoom)
+        return VStack(alignment: .leading, spacing: 14) {
+            header
+            addRow
+            todoList
+        }
+        .padding(20)
+        .frame(
+            width: WindowZoom.contentLayoutSize(for: windowZoom).width,
+            height: WindowZoom.contentLayoutSize(for: windowZoom).height,
+            alignment: .topLeading
+        )
+        .scaleEffect(scale, anchor: .topLeading)
+    }
+
+    private var noteBackground: some View {
+        RoundedRectangle(cornerRadius: 24, style: .continuous)
+            .fill(backgroundStyle.material)
+            .overlay {
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(backgroundStyle.tint)
+            }
     }
 
     private var header: some View {

@@ -32,30 +32,16 @@ struct WindowBehaviorTests {
         #expect(WindowZoom.zoomIn(from: 1.0) == 1.1)
         #expect(WindowZoom.zoomOut(from: 1.0) == 0.9)
         #expect(WindowZoom.reset == 1.0)
-        #expect(WindowZoom.size(for: 1.5).width == 540)
-        #expect(WindowZoom.size(for: 1.5).height == 630)
+        #expect(WindowZoom.contentScale(for: 1.5) == 1.5)
     }
 
-    @Test func resizedFrameKeepsTopLeftPinned() {
-        let frame = WindowZoom.frame(
-            for: 1.5,
-            currentFrame: WindowFrame(x: 100, y: 200, width: 360, height: 420)
-        )
-
-        #expect(frame.x == 100)
-        #expect(frame.y == -10)
-        #expect(frame.width == 540)
-        #expect(frame.height == 630)
+    @Test func contentZoomDoesNotChangeWindowBaseSize() {
+        #expect(WindowZoom.windowSize.width == 360)
+        #expect(WindowZoom.windowSize.height == 420)
     }
 
-    @Test func initialZoomAppliesOnlyOncePerWindow() {
-        var state = WindowZoomApplicationState()
-        let firstMain = state.shouldApplyInitialZoom(to: "main")
-        let secondMain = state.shouldApplyInitialZoom(to: "main")
-        let replacement = state.shouldApplyInitialZoom(to: "replacement")
-
-        #expect(firstMain)
-        #expect(!secondMain)
-        #expect(replacement)
+    @Test func zoomedContentLayoutSizeStaysAtWindowSize() {
+        #expect(WindowZoom.contentLayoutSize(for: 0.6).width == 360)
+        #expect(WindowZoom.contentLayoutSize(for: 1.8).height == 420)
     }
 }

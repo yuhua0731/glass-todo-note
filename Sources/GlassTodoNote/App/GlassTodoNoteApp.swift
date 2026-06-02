@@ -9,7 +9,6 @@ struct GlassTodoNoteApp: App {
     @State private var todoStore = TodoStore()
     @State private var windowController = StickyWindowController()
     @State private var stickyWindow: NSWindow?
-    @State private var zoomApplicationState = WindowZoomApplicationState()
     @State private var lastReminderFiredAt: Date?
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
@@ -19,14 +18,11 @@ struct GlassTodoNoteApp: App {
     var body: some Scene {
         WindowGroup("Glass Todo Note") {
             ContentView(store: todoStore)
-                .frame(minWidth: WindowZoom.baseWidth, minHeight: WindowZoom.baseHeight)
+                .frame(minWidth: WindowZoom.windowSize.width, minHeight: WindowZoom.windowSize.height)
                 .background {
                     WindowAccessor { window in
                         stickyWindow = window
                         configureStickyWindow(window)
-                        if zoomApplicationState.shouldApplyInitialZoom(to: "\(ObjectIdentifier(window))") {
-                            windowController.resize(window, zoom: windowZoom, animate: false)
-                        }
                     }
                 }
                 .task {
@@ -51,10 +47,6 @@ struct GlassTodoNoteApp: App {
                 }
                 .onChange(of: floatsAboveWindows) { _, _ in
                     configureStickyWindow(stickyWindow)
-                }
-                .onChange(of: windowZoom) { _, zoom in
-                    guard let stickyWindow else { return }
-                    windowController.resize(stickyWindow, zoom: zoom)
                 }
         }
         .windowStyle(.hiddenTitleBar)
