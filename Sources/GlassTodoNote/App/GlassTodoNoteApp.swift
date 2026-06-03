@@ -18,7 +18,12 @@ struct GlassTodoNoteApp: App {
 
     var body: some Scene {
         WindowGroup("Glass Todo Note") {
-            ContentView(store: todoStore)
+            ContentView(
+                store: todoStore,
+                onWindowDragStart: {
+                    windowController.userDidStartDraggingWindow()
+                }
+            )
                 .background {
                     WindowAccessor { window in
                         stickyWindow = window

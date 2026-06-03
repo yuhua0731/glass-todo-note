@@ -67,6 +67,10 @@ final class StickyWindowController {
         }
     }
 
+    func userDidStartDraggingWindow() {
+        cancelShake(restoringOrigin: false)
+    }
+
     private func installMoveDelegate(on window: NSWindow) {
         if let delegate = objc_getAssociatedObject(window, &Self.moveDelegateKey) as? StickyWindowMoveDelegate {
             if window.delegate !== delegate {
