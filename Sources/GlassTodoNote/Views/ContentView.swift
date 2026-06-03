@@ -4,7 +4,6 @@ import SwiftUI
 
 struct ContentView: View {
     @Bindable var store: TodoStore
-    var onWindowDragStart: () -> Void = {}
     @State private var newTitle = ""
     @AppStorage("window.opacity") private var windowOpacity = 0.86
     @AppStorage("window.floatsAboveWindows") private var floatsAboveWindows = true
@@ -66,13 +65,9 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(spacing: metric(10)) {
-            ZStack(alignment: .leading) {
-                WindowDragHandle(onDragStart: onWindowDragStart)
-                Text("Glass Todo")
-                    .font(.system(size: metric(16), weight: .semibold))
-                    .allowsHitTesting(false)
-            }
-            .frame(maxWidth: .infinity, minHeight: metric(28), alignment: .leading)
+            Text("Glass Todo")
+                .font(.system(size: metric(16), weight: .semibold))
+            Spacer()
             SettingsLink {
                 Image(systemName: "gearshape")
                     .font(.system(size: metric(16), weight: .medium))

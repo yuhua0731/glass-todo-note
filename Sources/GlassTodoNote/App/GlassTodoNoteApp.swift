@@ -18,12 +18,7 @@ struct GlassTodoNoteApp: App {
 
     var body: some Scene {
         WindowGroup("Glass Todo Note") {
-            ContentView(
-                store: todoStore,
-                onWindowDragStart: {
-                    windowController.userDidStartDraggingWindow()
-                }
-            )
+            ContentView(store: todoStore)
                 .background {
                     WindowAccessor { window in
                         stickyWindow = window
@@ -63,7 +58,6 @@ struct GlassTodoNoteApp: App {
                     scheduleStickyWindowFit()
                 }
         }
-        .windowStyle(.hiddenTitleBar)
         .commands {
             CommandMenu("View") {
                 Button("Zoom In") {

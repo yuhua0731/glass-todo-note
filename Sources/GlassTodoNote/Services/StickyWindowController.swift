@@ -12,8 +12,10 @@ final class StickyWindowController {
         window.backgroundColor = .clear
         window.hasShadow = true
         window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.styleMask.insert(.fullSizeContentView)
+        window.titlebarAppearsTransparent = false
+        window.styleMask.insert(.titled)
+        window.styleMask.remove(.fullSizeContentView)
+        window.isMovable = true
         window.isMovableByWindowBackground = true
         window.level = preferences.floatsAboveWindows ? .floating : .normal
         window.alphaValue = 1
@@ -65,10 +67,6 @@ final class StickyWindowController {
             self.activeShakeWindow = nil
             objc_setAssociatedObject(window, &Self.shakeOriginKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
-    }
-
-    func userDidStartDraggingWindow() {
-        cancelShake(restoringOrigin: false)
     }
 
     private func installMoveDelegate(on window: NSWindow) {
